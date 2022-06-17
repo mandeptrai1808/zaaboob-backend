@@ -1,4 +1,4 @@
-const {users} = require('../models');
+const {users, friends} = require('../models');
 const bcrypt = require('bcryptjs');
 const jsonwt = require('jsonwebtoken')
 
@@ -42,7 +42,7 @@ const loginUser = async (req,res) => {
     }
   }
 
-  const updateUser = async (req, res) => {
+const updateUser = async (req, res) => {
     const {name, phone, avatar} = req.body;
     const {id} = req.params;
     try {
@@ -71,11 +71,52 @@ const uploadAvatar= async (req, res) => {
     // res.send({file: file, body: req.body});
 }
 
+const addFriend = async (req, res) => {
+  const {userId, friendId} = req.body;
+  try {
+    const newConect1 = await friends.create({userId, friendId});
+    const newConect2 = await friends.create({userId: friendId, friendId: userId});
+    res.status(201).send({newConect1, newConect2});
+  } catch (error) {
+    res.status(500).send(error)
+  }
+}
 
+const unFriend = async (req, res) => {
+  const {userId, friendId} = req.body;
+
+  try {
+    await friends.destroy({where: {userId, friendId}});
+    await friends.destroy({where: {userId: friendId, friendId: userId}});
+    res.send("deleted!")
+  } catch (error) {
+    res.status(500).send(error)
+  }
+}
+
+const loginWithFacebook = async (req, res) => {
+  const {name, avatar, email} = req.body;
+  try {
+    const userFind = await users.findOne({where: {email}});
+    if (!userFind) {
+      const newUser = await users.create({
+        name, avatar, email, phone: 696969
+      })
+      res.status(201).send(newUser);
+    }
+    else res.send(userFind);
+    
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
 
 module.exports = {
     registerUser,
     loginUser,
     updateUser,
-    uploadAvatar
+    uploadAvatar,
+    addFriend,
+    unFriend,
+    loginWithFacebook
 }

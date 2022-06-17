@@ -3,9 +3,15 @@ const app = express();
 const path = require("path");
 const {sequelize} = require("./models");
 const { rootRouter } = require('./Router');
-
+const cors = require("cors");
 
 app.use(express.json());
+
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 
 
 const PORT = process.env.PORT || 6969;

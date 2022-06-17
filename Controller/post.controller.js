@@ -1,4 +1,4 @@
-const {posts, postimgaes, likes, comments} = require('../models')
+const {posts, postimgaes, likes, comments, users} = require('../models')
 
 const createNewPost = async (req, res) => {
   const {userId, status, content} = req.body;
@@ -20,7 +20,7 @@ const deletePost = async (req, res) => {
   }
 }
 
-const uploadPostImages =async (req, res) => {
+const uploadPostImages = async (req, res) => {
     const { file } = req;
     const pathImg = `http://localhost:6969/${file.path}`;
     const {postId} = req.params;
@@ -76,6 +76,39 @@ const deleteComment = async (req, res) => {
     res.status(500).send(error);
   }
 }
+
+const getPostById = async (req, res) => {
+  const {id} = req.params;
+  try {
+    const postDetail = await posts.findOne({where: {id}});
+    const listLike = await likes.findAll({where: {postId: id}});
+    const listCmt= await comments.findAll({where: {postId: id}});
+    const listImg = await postimgaes.findAll({where: {postId: id}});
+    const ownOfPost = await users.findOne({where: {id: postDetail.userId}})
+    res.send({postDetail,listImg, listLike, listCmt, ownOfPost});
+  } catch (error) {
+    res.status(500).send(error)
+  }
+}
+
+const getPostByUserId = async (req, res) => {
+  const {userId} = req.params;
+  try {
+    const listPost = await posts.findAll({where: {userId}});
+    let result = [];
+    listPost.map(async (item, index) => {
+      const listLike = await likes.findAll({where: {postId: item.id}});
+      const listCmt= await comments.findAll({where: {postId: item.id}});
+      const listImg = await postimgaes.findAll({where: {postId: item.id}});
+      const ownOfPost = await users.findOne({where: {id: item.userId}});
+      result.push({postDetail: item, listImg, listLike, listCmt, ownOfPost});
+      if (index === listPost.length - 1) res.send(result);
+    })
+    // res.send(result)
+  } catch (error) {
+    res.status(500).send(error)
+  }
+}
 module.exports = {
     createNewPost,
     deletePost,
@@ -83,5 +116,7 @@ module.exports = {
     likeThisPost,
     unlikeThisPost,
     commentThisPost,
-    deleteComment
+    deleteComment,
+    getPostById,
+    getPostByUserId
 }
