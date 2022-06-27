@@ -18,7 +18,7 @@ const uploadImg = (type) => {
     storage: storage,
     fileFilter: function (req, file, cb) {
       console.log({ reqUP: req.body });
-      const extensionImg = [".png", ".jpg"];
+      const extensionImg = [".png", ".jpg", "jfif"];
       const extension = file.originalname.slice(-4);
       const check = extensionImg.includes(extension);
       if (check) {

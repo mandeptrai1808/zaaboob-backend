@@ -1,7 +1,8 @@
-const {users, friends} = require('../models');
+const {users, friends, requestfriend} = require('../models');
 const bcrypt = require('bcryptjs');
 const jsonwt = require('jsonwebtoken')
-
+const Sequelize = require("sequelize");
+const Op = Sequelize.Op;
 const registerUser = async (req, res) => {
     const { name,email, phone, password} = req.body;
     const salt = bcrypt.genSaltSync(10);
@@ -42,6 +43,15 @@ const loginUser = async (req,res) => {
     }
   }
 
+const getUserByUserId = async (req, res) => {
+  const {id} = req.params;
+  try {
+    let data = await users.findOne({where: {id}})
+    res.send(data);
+  } catch (error) {
+    res.status(500).send(error);    
+  }
+}
 const updateUser = async (req, res) => {
     const {name, phone, avatar} = req.body;
     const {id} = req.params;
@@ -57,15 +67,51 @@ const updateUser = async (req, res) => {
     }
   }
   
+const getAllUser = async (req, res) => {
+  // const {userId} = req.params;
+  try {
+    // let result = []
+    let userlist = await users.findAll();
+    if (userlist.length == 0) res.send([]);
+    userlist.map( async (item, index) => {
+      let listFriends = await friends.findAll({where: {userId: item.id}});
+      userlist[index] = {user: userlist[index], listFriends};
+      if (userlist.length - 1  === index) res.send(userlist)
+      // result.push({...item,listFriends});
+
+      // res.send(result);
+    })
+    // res.send(result);
+  } catch (error) {
+    res.status(500).send(error)
+  }
+}
+
+const findUserByName = async (req, res) => {
+  const {name} = req.params;
+  console.log(name)
+  try {
+    let userlist = await users.findAll({where: {name: {[Op.like]: `%${name}%`}}});
+    if (userlist.length == 0) res.send([]);
+    userlist.map( async (item, index) => {
+      let listFriends = await friends.findAll({where: {userId: item.id}});
+      userlist[index] = {user: userlist[index], listFriends};
+      if (userlist.length - 1  === index) res.send(userlist)
+    })
+  } catch (error) {
+    res.status(500).send(error)
+    
+  }
+}
 const uploadAvatar= async (req, res) => {
     const { file } = req;
     const pathImg = `http://localhost:6969/${file.path}`;
-    const { email } = req.user;
-    const foundUser = await users.findOne({ where: { email } });
+    const { id } = req.params;
     // foundUser.avatar = pathImg;
     // await foundUser.save();
-
-    await users.update({avatar: pathImg}, {where: {email}});
+    
+    await users.update({avatar: pathImg}, {where: {id}});
+    const foundUser = await users.findOne({ where: { id } });
     
     res.send({ msg: "Da upload avatar", file: pathImg, user: foundUser });
     // res.send({file: file, body: req.body});
@@ -111,6 +157,55 @@ const loginWithFacebook = async (req, res) => {
   }
 }
 
+const sendRequestAddFriend = async (req, res) => {
+  const {userGet, userSend, content} = req.body;
+  try {
+    let newRequest = await requestfriend.create({userGet, userSend, content});
+    res.status(201).send(newRequest);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
+
+const deleteRequestAddFriend = async (req, res) => {
+  // const {id} = req.params;
+  const {userGet, userSend} = req.body;
+
+  try {
+    await requestfriend.destroy({where: {userGet, userSend}});
+    res.send("DELETED!");
+  } catch (error) {
+    res.status(500).send(error)
+  }
+}
+
+const getRequestHasSendByUserId = async (req, res) => {
+  const {userSend} = req.params;
+  try {
+    let data = await requestfriend.findAll({where: {userSend}});
+    res.send(data);
+  } catch (error) {
+    res.send(error)    
+  }
+}
+
+const getRequestHasGetByUserId = async (req, res) => {
+  const {userGet} = req.params;
+  try {
+    let data = await requestfriend.findAll({where: {userGet}});
+    if (data.length == 0) res.send([]);
+    data.map( async (item, index) => {
+      let userInfo = await users.findOne({where: {id: item.userSend}});
+      data[index] = {user: userInfo, content: item.content};
+      if (data.length - 1  === index) res.send(data)
+      // result.push({...item,listFriends});
+
+      // res.send(result);
+    })
+  } catch (error) {
+    res.status(500).send(error)
+  }
+}
 module.exports = {
     registerUser,
     loginUser,
@@ -118,5 +213,12 @@ module.exports = {
     uploadAvatar,
     addFriend,
     unFriend,
-    loginWithFacebook
+    loginWithFacebook,
+    getAllUser,
+    findUserByName,
+    sendRequestAddFriend,
+    deleteRequestAddFriend,
+    getRequestHasSendByUserId,
+    getRequestHasGetByUserId,
+    getUserByUserId
 }

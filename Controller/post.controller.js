@@ -109,6 +109,25 @@ const getPostByUserId = async (req, res) => {
     res.status(500).send(error)
   }
 }
+
+
+const getAllPost = async (req, res) => {
+  try {
+    const listPost = await posts.findAll();
+    let result = [];
+    listPost.map(async (item, index) => {
+      const listLike = await likes.findAll({where: {postId: item.id}});
+      const listCmt= await comments.findAll({where: {postId: item.id}});
+      const listImg = await postimgaes.findAll({where: {postId: item.id}});
+      const ownOfPost = await users.findOne({where: {id: item.userId}});
+      result.push({postDetail: item, listImg, listLike, listCmt, ownOfPost});
+      if (index === listPost.length - 1) res.send(result);
+    })
+    // res.send(result)
+  } catch (error) {
+    res.status(500).send(error)
+  }
+}
 module.exports = {
     createNewPost,
     deletePost,
@@ -118,5 +137,6 @@ module.exports = {
     commentThisPost,
     deleteComment,
     getPostById,
-    getPostByUserId
+    getPostByUserId,
+    getAllPost
 }

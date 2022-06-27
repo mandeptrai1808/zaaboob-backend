@@ -1,5 +1,5 @@
 const express = require('express');
-const { createNewPost, deletePost, uploadPostImages, likeThisPost, unlikeThisPost, commentThisPost, deleteComment, getPostById, getPostByUserId } = require('../Controller/post.controller');
+const { createNewPost, deletePost, uploadPostImages, likeThisPost, unlikeThisPost, commentThisPost, deleteComment, getPostById, getPostByUserId, getAllPost } = require('../Controller/post.controller');
 const { uploadImg } = require('../Middleware/Upload/uploadImg');
 const postRouter  = express.Router();
 
@@ -12,6 +12,7 @@ postRouter.post("/comment", commentThisPost)
 postRouter.delete("/deletecomment/:id", deleteComment)
 postRouter.get("/byid/:id",getPostById);
 postRouter.get("/byuserid/:userId",getPostByUserId), 
+postRouter.get("/getallpost", getAllPost)
 module.exports = {
     postRouter
 }
