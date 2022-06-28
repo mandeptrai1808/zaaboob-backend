@@ -1,5 +1,5 @@
 const express = require('express');
-const { createNewPost, deletePost, uploadPostImages, likeThisPost, unlikeThisPost, commentThisPost, deleteComment, getPostById, getPostByUserId, getAllPost } = require('../Controller/post.controller');
+const { createNewPost, deletePost, uploadPostImages, likeThisPost, unlikeThisPost, commentThisPost, deleteComment, getPostById, getPostByUserId, getAllPost, updatePostStatus } = require('../Controller/post.controller');
 const { uploadImg } = require('../Middleware/Upload/uploadImg');
 const postRouter  = express.Router();
 
@@ -13,6 +13,8 @@ postRouter.delete("/deletecomment/:id", deleteComment)
 postRouter.get("/byid/:id",getPostById);
 postRouter.get("/byuserid/:userId",getPostByUserId), 
 postRouter.get("/getallpost", getAllPost)
+postRouter.put("/update-status", updatePostStatus)
+
 module.exports = {
     postRouter
 }

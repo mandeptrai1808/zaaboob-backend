@@ -83,6 +83,11 @@ const getPostById = async (req, res) => {
     const postDetail = await posts.findOne({where: {id}});
     const listLike = await likes.findAll({where: {postId: id}});
     const listCmt= await comments.findAll({where: {postId: id}});
+    listCmt.map( async (itemCmt, indexCmt) => {
+      const userCmt = await users.findOne({where: {id: itemCmt.userId}});
+      // if (index <= listCmt.length-1)
+      listCmt[indexCmt] = {comment: listCmt[indexCmt], userCmt}
+    })
     const listImg = await postimgaes.findAll({where: {postId: id}});
     const ownOfPost = await users.findOne({where: {id: postDetail.userId}})
     res.send({postDetail,listImg, listLike, listCmt, ownOfPost});
@@ -99,6 +104,11 @@ const getPostByUserId = async (req, res) => {
     listPost.map(async (item, index) => {
       const listLike = await likes.findAll({where: {postId: item.id}});
       const listCmt= await comments.findAll({where: {postId: item.id}});
+      listCmt.map( async (itemCmt, indexCmt) => {
+        const userCmt = await users.findOne({where: {id: itemCmt.userId}});
+        // if (index <= listCmt.length-1)
+        listCmt[indexCmt] = {comment: listCmt[indexCmt], userCmt}
+      })
       const listImg = await postimgaes.findAll({where: {postId: item.id}});
       const ownOfPost = await users.findOne({where: {id: item.userId}});
       result.push({postDetail: item, listImg, listLike, listCmt, ownOfPost});
@@ -117,13 +127,29 @@ const getAllPost = async (req, res) => {
     let result = [];
     listPost.map(async (item, index) => {
       const listLike = await likes.findAll({where: {postId: item.id}});
-      const listCmt= await comments.findAll({where: {postId: item.id}});
+      let listCmt = await comments.findAll({where: {postId: item.id}});
+      listCmt.map( async (itemCmt, indexCmt) => {
+        const userCmt = await users.findOne({where: {id: itemCmt.userId}});
+        // if (index <= listCmt.length-1)
+        listCmt[indexCmt] = {comment: listCmt[indexCmt], userCmt}
+      })
       const listImg = await postimgaes.findAll({where: {postId: item.id}});
       const ownOfPost = await users.findOne({where: {id: item.userId}});
       result.push({postDetail: item, listImg, listLike, listCmt, ownOfPost});
       if (index === listPost.length - 1) res.send(result);
     })
     // res.send(result)
+  } catch (error) {
+    res.status(500).send(error)
+  }
+}
+
+const updatePostStatus = async (req, res) => {
+  const {id, status} = req.body;
+  try {
+    await posts.update({status}, {where: {id}});
+    const newPost = await posts.findOne({where: {id}});
+    res.send(newPost)
   } catch (error) {
     res.status(500).send(error)
   }
@@ -138,5 +164,6 @@ module.exports = {
     deleteComment,
     getPostById,
     getPostByUserId,
-    getAllPost
+    getAllPost,
+    updatePostStatus
 }

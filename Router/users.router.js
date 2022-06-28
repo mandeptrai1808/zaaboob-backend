@@ -1,4 +1,5 @@
 const express = require('express');
+const { updatePostStatus } = require('../Controller/post.controller');
 const { registerUser, loginUser, updateUser, uploadAvatar, addFriend, unFriend, loginWithFacebook, getAllUser, findUserByName, sendRequestAddFriend, deleteRequestAddFriend, getRequestHasSendByUserId, getRequestHasGetByUserId, getUserByUserId } = require('../Controller/users.controller');
 const { authenticate } = require('../Middleware/Auth/authenticate');
 const { uploadImg } = require('../Middleware/Upload/uploadImg');
