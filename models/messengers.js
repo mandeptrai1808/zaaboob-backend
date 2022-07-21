@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
     roomId: DataTypes.INTEGER,
     content: DataTypes.STRING,
     status: DataTypes.STRING,
+    isSeen: DataTypes.STRING,
     userSendId: DataTypes.INTEGER
   }, {
     sequelize,

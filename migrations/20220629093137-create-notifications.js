@@ -18,6 +18,9 @@ module.exports = {
       content: {
         type: Sequelize.STRING
       },
+      postId: {
+        type: Sequelize.INTEGER
+      },
       userSendId: {
         type: Sequelize.INTEGER
       },

@@ -1,10 +1,10 @@
 const {notifications, users} = require("../models")
 
 const createNewNotification = async (req, res) => {
-  const {userId, content,status, userSendId} = req.body;
+  const {userId, content,status, userSendId, postId} = req.body;
   try {
     const newNotification = await notifications.create({
-        userId, content, userSendId, status
+        userId, content, userSendId, status, postId
     })
     res.status(201).send(newNotification);
   } catch (error) {
@@ -28,8 +28,8 @@ const getNotificationByUserId = async (req, res) => {
     let data = await notifications.findAll({where: {userId}});
     if (data.length === 0) res.send(data);
     data.map( async (item, index) => {
-      let userSend = await users.findAll({where: {id: item.userSendId}})
-      data[index] = {content: item.content, status: item.status, userSend}
+      let userSend = await users.findOne({where: {id: item.userSendId}})
+      data[index] = {id:item.id,content: item.content, status: item.status,postId: item.postId, userSend}
       if (index === data.length - 1) res.send(data)
     })
   } catch (error) {

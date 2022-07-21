@@ -7,11 +7,27 @@ const createNewMessenger = async (req, res) => {
         roomId,
         content,
         status,
-        userSendId
+        userSendId,
+        isSeen: "NO"
     })
     res.status(201).send(newMess)
   } catch (error) {
     res.status(500).send(error)
+  }
+}
+
+const seenMessageByRoomId = async (req, res) => {
+  const {roomId, userId} = req.params;
+  try {
+    let data = await messengers.findAll({where: {roomId}});
+    data.map(async (item) => {
+      if(item.userSendId !== userId){
+        await messengers.update({isSeen: "YES"}, {where: {id: item.id}})
+      }
+    })
+    res.send(data)
+  } catch (error) {
+    console.log(error)
   }
 }
 
@@ -51,5 +67,6 @@ const sendImageMessage = async (req, res) => {
 module.exports = {
     createNewMessenger,
     getMessagesByRoomId,
-    sendImageMessage
+    sendImageMessage,
+    seenMessageByRoomId
 }

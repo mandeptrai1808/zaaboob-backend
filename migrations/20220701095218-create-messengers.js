@@ -17,6 +17,9 @@ module.exports = {
       status: {
         type: Sequelize.STRING
       },
+      isSeen: {
+        type: Sequelize.STRING
+      },
       userSendId: {
         type: Sequelize.INTEGER
       },
