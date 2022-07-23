@@ -8,7 +8,7 @@ const userRouter = express.Router();
 
 userRouter.post('/register', registerUser)
 userRouter.post('/login', loginUser)
-userRouter.put('/update', updateUser)
+userRouter.put('/update/:id', updateUser)
 userRouter.post("/upload-avatar/:id", uploadImg("Avatar"), uploadAvatar)
 userRouter.post("/addfriend", addFriend);
 userRouter.delete("/unfriend", unFriend)
